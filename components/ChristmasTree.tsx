@@ -241,9 +241,18 @@ const ChristmasTree: React.FC<ChristmasTreeProps> = ({ onClose }) => {
       });
 
       // 所有粒子展开后，进入idle状态并显示消息
-      // 使用两种判断：粒子全部展开，或者超过3秒（确保消息一定会显示）
+      // 使用两种判断：粒子全部展开，或者超过2秒（确保消息一定会显示）
       const bloomDuration = Date.now() - bloomStartTime;
-      const shouldShowMessage = (state === 'blooming' && allExpanded) || (bloomDuration > 3000);
+      
+      // 计算已展开的粒子比例
+      let expandedCount = 0;
+      particlesRef.current.forEach(p => {
+        if (p.currentRadiusScale >= 0.99) expandedCount++;
+      });
+      const expandedRatio = particlesRef.current.length > 0 ? expandedCount / particlesRef.current.length : 0;
+      
+      // 当粒子全部展开，或超过2秒，或80%以上展开时显示消息
+      const shouldShowMessage = (state === 'blooming' && allExpanded) || (bloomDuration > 2000) || (expandedRatio >= 0.8);
       
       if (shouldShowMessage && !messageShownRef.current) {
         state = 'idle';
@@ -251,7 +260,7 @@ const ChristmasTree: React.FC<ChristmasTreeProps> = ({ onClose }) => {
         setTimeout(() => {
           setShowMessage(true);
           typeWriter(loveLetter);
-        }, 1000);
+        }, 500);
       }
 
       // 深度排序
