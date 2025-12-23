@@ -34,7 +34,7 @@ const App: React.FC = () => {
         </button>
         {!isMuted && (
           <iframe
-            src="https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1&loop=1&playlist=jfKfPfyJRdk"
+            src="https://www.youtube.com/embed/WPZPNtQ8YW8?autoplay=1&loop=1&playlist=WPZPNtQ8YW8"
             className="hidden"
             allow="autoplay"
           />
