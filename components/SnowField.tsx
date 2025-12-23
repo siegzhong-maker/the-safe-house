@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect } from 'react';
-import { SOUL_TRAITS } from '../constants';
 
 interface SnowFlake {
   id: number;
@@ -14,7 +13,6 @@ interface SnowFlake {
 
 const SnowField: React.FC = () => {
   const [snowflakes, setSnowflakes] = useState<SnowFlake[]>([]);
-  const [activeTrait, setActiveTrait] = useState<string | null>(null);
 
   useEffect(() => {
     const flakes = Array.from({ length: 40 }).map((_, i) => ({
@@ -24,16 +22,9 @@ const SnowField: React.FC = () => {
       duration: Math.random() * 12 + 10,
       delay: Math.random() * -20,
       isSpecial: Math.random() > 0.75,
-      traitIndex: Math.floor(Math.random() * SOUL_TRAITS.length)
     }));
     setSnowflakes(flakes);
   }, []);
-
-  const handleTraitClick = (e: React.MouseEvent, text: string) => {
-    e.stopPropagation();
-    setActiveTrait(text);
-    setTimeout(() => setActiveTrait(null), 4000);
-  };
 
   return (
     // 容器保持透明，z-20 确保雪花在内容上方可点，但 pointer-events-none 允许点击穿透到不带 pointer-events-auto 的区域
@@ -43,7 +34,7 @@ const SnowField: React.FC = () => {
       {snowflakes.map((flake) => (
         <div
           key={flake.id}
-          className="absolute pointer-events-auto cursor-pointer flex items-center justify-center"
+          className="absolute flex items-center justify-center"
           style={{
             top: '-10%',
             left: `${flake.x}%`,
@@ -51,9 +42,7 @@ const SnowField: React.FC = () => {
             height: flake.isSpecial ? '44px' : `${flake.size}px`,
             animation: `fall ${flake.duration}s linear infinite`,
             animationDelay: `${flake.delay}s`,
-          }}
-          onClick={(e) => flake.isSpecial && flake.traitIndex !== undefined && handleTraitClick(e, SOUL_TRAITS[flake.traitIndex])}
-        >
+          }}>
           <div 
             className={`rounded-full bg-white transition-shadow ${
               flake.isSpecial 
@@ -67,17 +56,6 @@ const SnowField: React.FC = () => {
           />
         </div>
       ))}
-
-      {/* Trait Toast */}
-      {activeTrait && (
-        <div className="fixed top-1/4 left-0 right-0 z-[100] flex justify-center px-8 pointer-events-none">
-          <div className="bg-amber-900/80 backdrop-blur-3xl border border-amber-200/30 px-8 py-5 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] animate-float-up max-w-xs text-center">
-            <p className="text-amber-100 text-base font-serif italic tracking-wider leading-relaxed">
-              ✨ {activeTrait}
-            </p>
-          </div>
-        </div>
-      )}
 
       <style>{`
         @keyframes fall {

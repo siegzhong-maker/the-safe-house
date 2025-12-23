@@ -70,9 +70,6 @@ const App: React.FC = () => {
             <span className="absolute -top-4 -right-2 text-2xl opacity-20 rotate-12">❄️</span>
           </div>
           <Evidence />
-          <p className="text-center mt-6 text-[10px] text-slate-500 tracking-widest animate-pulse">
-            ( 试着点击背景中闪烁的雪花 )
-          </p>
         </section>
 
         <div className="h-10" />
