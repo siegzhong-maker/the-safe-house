@@ -57,11 +57,11 @@ const ChristmasTree: React.FC<ChristmasTreeProps> = ({ onClose }) => {
     let width = window.innerWidth;
     let height = window.innerHeight;
     let angleY = 0;
-    let targetAngleY = 0;
     const autoRotateSpeed = 0.005;
     let isInteracting = false;
     let lastX = 0;
     let state: 'waiting' | 'blooming' | 'idle' = 'waiting';
+    let bloomStartTime = Date.now();
 
     const resize = () => {
       width = window.innerWidth;
@@ -202,6 +202,7 @@ const ChristmasTree: React.FC<ChristmasTreeProps> = ({ onClose }) => {
       // 更新状态
       if (state === 'waiting') {
         state = 'blooming';
+        bloomStartTime = Date.now();
       }
 
       // 更新雪花
@@ -223,9 +224,12 @@ const ChristmasTree: React.FC<ChristmasTreeProps> = ({ onClose }) => {
         p.alpha = 0.4 + 0.4 * Math.sin(Date.now() * p.blinkSpeed * 0.05 + p.blinkOffset);
         
         if (state === 'blooming') {
-          if (p.currentRadiusScale < 1) {
-            p.currentRadiusScale += 0.01 * (1.1 - p.yRatio);
+          if (p.currentRadiusScale < 0.99) {
+            p.currentRadiusScale += 0.02 * (1.1 - p.yRatio);
+            if (p.currentRadiusScale > 1) p.currentRadiusScale = 1;
             allExpanded = false;
+          } else {
+            p.currentRadiusScale = 1;
           }
         } else if (state === 'idle') {
           p.currentRadiusScale = 1;
@@ -237,7 +241,11 @@ const ChristmasTree: React.FC<ChristmasTreeProps> = ({ onClose }) => {
       });
 
       // 所有粒子展开后，进入idle状态并显示消息
-      if (state === 'blooming' && allExpanded && !messageShownRef.current) {
+      // 使用两种判断：粒子全部展开，或者超过3秒（确保消息一定会显示）
+      const bloomDuration = Date.now() - bloomStartTime;
+      const shouldShowMessage = (state === 'blooming' && allExpanded) || (bloomDuration > 3000);
+      
+      if (shouldShowMessage && !messageShownRef.current) {
         state = 'idle';
         messageShownRef.current = true;
         setTimeout(() => {
