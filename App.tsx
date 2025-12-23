@@ -1,12 +1,58 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Anchor from './components/Anchor';
 import Evidence from './components/Evidence';
 import SignalButton from './components/SignalButton';
 import SnowField from './components/SnowField';
 
 const App: React.FC = () => {
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(false); // 默认不静音，允许播放
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    // 创建音频对象
+    const audio = new Audio('/the-safe-house/M500004QArdZ2RgR0C.mp3');
+    audio.loop = true;
+    audio.volume = 0.5;
+    audioRef.current = audio;
+
+    // 尝试自动播放（先静音播放以绕过浏览器限制，然后立即取消静音）
+    audio.muted = true;
+    const playPromise = audio.play().then(() => {
+      // 播放成功后立即取消静音
+      audio.muted = false;
+    }).catch((error) => {
+      // 如果自动播放被阻止，取消静音状态，用户可以通过按钮手动播放
+      audio.muted = false;
+      console.log('Auto-play prevented:', error);
+    });
+
+    // 清理函数
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
+
+  // 监听 isMuted 状态变化，控制音频播放/暂停
+  useEffect(() => {
+    if (!audioRef.current) return;
+    
+    if (isMuted) {
+      audioRef.current.pause();
+    } else {
+      // 确保取消静音状态
+      audioRef.current.muted = false;
+      const playPromise = audioRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((error) => {
+          console.log('Play failed:', error);
+        });
+      }
+    }
+  }, [isMuted]);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200 relative overflow-hidden flex flex-col items-center">
@@ -32,13 +78,6 @@ const App: React.FC = () => {
             </svg>
           )}
         </button>
-        {!isMuted && (
-          <iframe
-            src="https://www.youtube.com/embed/WPZPNtQ8YW8?autoplay=1&loop=1&playlist=WPZPNtQ8YW8"
-            className="hidden"
-            allow="autoplay"
-          />
-        )}
       </div>
 
       {/* Main Content Container */}
